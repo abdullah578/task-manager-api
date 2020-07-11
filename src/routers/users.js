@@ -36,10 +36,10 @@ router.patch("/users/:id", async (req, res) => {
       allowedProperties.includes(prop)
     );
     if (!isValid) return res.status(400).send("Invalid update");
-    const user = await Users.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    let user = await Users.findById(req.params.id);
+    Object.keys(req.body).forEach((prop) => (user[prop] = req.body[prop]));
+    await user.save();
+
     if (!user) return res.status(404).send();
     res.send(user);
   } catch (err) {
