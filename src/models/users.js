@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
-
+const jwt = require("jsonwebtoken");
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -27,8 +27,15 @@ const userSchema = new mongoose.Schema({
     min: 1,
     default: 20,
   },
+  tokens: [
+    {
+      token: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
 });
-
 
 userSchema.pre("save", async function (next) {
   const user = this;
@@ -37,13 +44,20 @@ userSchema.pre("save", async function (next) {
   }
   next();
 });
-
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await Users.findOne({ email });
   if (!user) throw new Error("Login Unsuccessful");
-  const isMatch =await bcrypt.compare(password, user.password);
+  const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Login unsuccessful");
   return user;
+};
+
+userSchema.methods.generateAuthToken = async function () {
+  const user = this;
+  const token = jwt.sign({ _id: user._id.toString() }, "Thisismycoursepayload");
+  user.tokens.push({ token });
+  await user.save();
+  return token;
 };
 
 const Users = mongoose.model("Users", userSchema);
