@@ -1,5 +1,6 @@
 const express = require("express");
 const Users = require("../models/users");
+const auth = require("../middleware/auth");
 
 const router = new express.Router();
 router.post("/users", async (req, res) => {
@@ -23,13 +24,29 @@ router.post("/users/login", async (req, res) => {
     res.status(400).send(e);
   }
 });
-router.get("/users", async (req, res) => {
+
+router.post("/users/logoutAll", async (req, res) => {
   try {
-    const users = await Users.find({});
-    res.send(users);
+    req.user.tokens = [];
+    await req.user.save();
+    res.send();
+  } catch (err) {
+    res.status(500).send(e);
+  }
+});
+router.post("/users/logout", auth, async (req, res) => {
+  try {
+    req.user.tokens = req.user.tokens.filter(
+      (curr) => curr.token !== req.token
+    );
+    await req.user.save();
+    res.send();
   } catch (err) {
     res.status(500).send(err);
   }
+});
+router.get("/users/me", auth, async (req, res) => {
+  res.send(req.user);
 });
 router.get("/users/:id", async (req, res) => {
   const id = req.params.id;
@@ -41,6 +58,7 @@ router.get("/users/:id", async (req, res) => {
     res.status(500).send(err);
   }
 });
+
 router.patch("/users/:id", async (req, res) => {
   try {
     const allowedProperties = ["name", "age", "age", "email", "password"];
