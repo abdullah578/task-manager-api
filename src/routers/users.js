@@ -8,7 +8,7 @@ router.post("/users", async (req, res) => {
   try {
     await user.save();
     const token = await user.generateAuthToken();
-    res.status(201).send({ user, token });
+    res.status(201).send({ user: user.getPublicProfile(), token });
   } catch (err) {
     res.status(400).send(err);
   }
@@ -19,7 +19,7 @@ router.post("/users/login", async (req, res) => {
     const { email, password } = req.body;
     const user = await Users.findByCredentials(email, password);
     const token = await user.generateAuthToken();
-    res.send({ user, token });
+    res.send({ user: user.getPublicProfile(), token });
   } catch (e) {
     res.status(400).send(e);
   }
@@ -48,41 +48,27 @@ router.post("/users/logout", auth, async (req, res) => {
 router.get("/users/me", auth, async (req, res) => {
   res.send(req.user);
 });
-router.get("/users/:id", async (req, res) => {
-  const id = req.params.id;
-  try {
-    const user = await Users.findById(id);
-    if (!user) return res.status(400).send();
-    res.send(user);
-  } catch (err) {
-    res.status(500).send(err);
-  }
-});
 
-router.patch("/users/:id", async (req, res) => {
+router.patch("/users/me", auth, async (req, res) => {
   try {
-    const allowedProperties = ["name", "age", "age", "email", "password"];
+    const allowedProperties = ["name", "age", "age", "password"];
     const isValid = Object.keys(req.body).every((prop) =>
       allowedProperties.includes(prop)
     );
     if (!isValid) return res.status(400).send("Invalid update");
-    let user = await Users.findById(req.params.id);
+    let user = req.user;
     Object.keys(req.body).forEach((prop) => (user[prop] = req.body[prop]));
     await user.save();
-
-    if (!user) return res.status(404).send();
     res.send(user);
   } catch (err) {
     res.status(400).send(err);
   }
 });
 
-router.delete("/users/:id", async (req, res) => {
-  const id = req.params.id;
+router.delete("/users/me", auth, async (req, res) => {
   try {
-    const user = await Users.findByIdAndDelete(id);
-    if (!user) return res.status(404).send();
-    res.send(user);
+    await req.user.remove();
+    res.send(req.user);
   } catch (err) {
     res.status(500).send(err);
   }

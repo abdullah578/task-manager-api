@@ -59,6 +59,10 @@ userSchema.methods.generateAuthToken = async function () {
   await user.save();
   return token;
 };
+userSchema.methods.getPublicProfile = function () {
+  const user = this;
+  return { name: user.name, _id: user._id, email: user.email, age: user.age };
+};
 
 const Users = mongoose.model("Users", userSchema);
 
