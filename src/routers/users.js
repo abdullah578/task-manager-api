@@ -47,6 +47,17 @@ router.delete("users/me/avatar", auth, async (req, res) => {
   res.send();
 });
 
+router.get("/users/:id/avatar", async (req, res) => {
+  try {
+    const user = await Users.findById(req.params.id);
+    if (!user || !user.avatar) throw new Error("Not Found");
+    res.set("Content-Type", "image/jpg");
+    res.send(user.avatar);
+  } catch (err) {
+    res.status(404).send(err);
+  }
+});
+
 router.post("/users/login", async (req, res) => {
   try {
     const { email, password } = req.body;
