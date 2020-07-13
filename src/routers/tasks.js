@@ -14,8 +14,13 @@ router.post("/tasks", auth, async (req, res) => {
 
 router.get("/tasks", auth, async (req, res) => {
   const match = {};
+  const sort = {};
   if (req.query.completed) {
     match.completed = req.query.completed === "true" ? true : false;
+  }
+  if (req.query.sortBy) {
+    const [property, order] = req.query.sortBy.split("_");
+    sort[property] = order === "asc" ? 1 : -1;
   }
   try {
     await req.user
@@ -25,6 +30,7 @@ router.get("/tasks", auth, async (req, res) => {
         options: {
           skip: parseInt(req.query.skip),
           limit: parseInt(req.query.limit),
+          sort,
         },
       })
       .execPopulate();
