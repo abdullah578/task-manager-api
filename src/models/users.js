@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const Tasks = require("./tasks");
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -44,6 +45,11 @@ userSchema.pre("save", async function (next) {
   }
   next();
 });
+userSchema.pre("remove", async function (next) {
+  const user = this;
+  await Tasks.deleteMany({ owner: user._id });
+  next();
+});
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await Users.findOne({ email });
   if (!user) throw new Error("Login Unsuccessful");
@@ -64,6 +70,11 @@ userSchema.methods.getPublicProfile = function () {
   return { name: user.name, _id: user._id, email: user.email, age: user.age };
 };
 
+userSchema.virtual("tasks", {
+  ref: "Tasks",
+  localField: "_id",
+  foreignField: "owner",
+});
 const Users = mongoose.model("Users", userSchema);
 
 module.exports = Users;
