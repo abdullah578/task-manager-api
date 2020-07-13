@@ -29,6 +29,9 @@ const userSchema = new mongoose.Schema(
       min: 1,
       default: 20,
     },
+    avatar: {
+      type: Buffer,
+    },
     tokens: [
       {
         token: {
