@@ -3,40 +3,43 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Tasks = require("./tasks");
-const userSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
-    trim: true,
-    unique: true,
-    lowercase: true,
-    validate(value) {
-      if (!validator.isEmail(value)) throw new Error("Invalid Email");
-    },
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 7,
-  },
-  name: {
-    type: String,
-    required: true,
-  },
-  age: {
-    type: Number,
-    min: 1,
-    default: 20,
-  },
-  tokens: [
-    {
-      token: {
-        type: String,
-        required: true,
+const userSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+      lowercase: true,
+      validate(value) {
+        if (!validator.isEmail(value)) throw new Error("Invalid Email");
       },
     },
-  ],
-});
+    password: {
+      type: String,
+      required: true,
+      minlength: 7,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    age: {
+      type: Number,
+      min: 1,
+      default: 20,
+    },
+    tokens: [
+      {
+        token: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+  },
+  { timestamps: true }
+);
 
 userSchema.pre("save", async function (next) {
   const user = this;
@@ -66,8 +69,10 @@ userSchema.methods.generateAuthToken = async function () {
   return token;
 };
 userSchema.methods.getPublicProfile = function () {
-  const user = this;
-  return { name: user.name, _id: user._id, email: user.email, age: user.age };
+  const user = { ...this.toObject() };
+  delete user.password;
+  delete user.tokens;
+  return user;
 };
 
 userSchema.virtual("tasks", {
