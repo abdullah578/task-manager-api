@@ -2,6 +2,8 @@ const express = require("express");
 const Tasks = require("../models/tasks");
 const auth = require("../middleware/auth");
 const router = new express.Router();
+
+//create new task
 router.post("/tasks", auth, async (req, res) => {
   const task = new Tasks({ ...req.body, owner: req.user._id });
   try {
@@ -12,6 +14,7 @@ router.post("/tasks", auth, async (req, res) => {
   }
 });
 
+//get all tasks for the current user
 router.get("/tasks", auth, async (req, res) => {
   const match = {};
   const sort = {};
@@ -40,6 +43,7 @@ router.get("/tasks", auth, async (req, res) => {
   }
 });
 
+//get task by id
 router.get("/tasks/:id", auth, async (req, res) => {
   const id = req.params.id;
   try {
@@ -51,6 +55,7 @@ router.get("/tasks/:id", auth, async (req, res) => {
   }
 });
 
+//update task by id
 router.patch("/tasks/:id", async (req, res) => {
   try {
     const allowedProperties = ["description", "completed"];
@@ -68,6 +73,8 @@ router.patch("/tasks/:id", async (req, res) => {
     res.status(400).send(err);
   }
 });
+
+//delete task by id
 router.delete("/tasks/:id", auth, async (req, res) => {
   const id = req.params.id;
   try {

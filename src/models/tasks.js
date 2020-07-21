@@ -1,5 +1,10 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+
+/*
+created a tasks schema with description field required. completed field is set to 
+falseby default
+*/
 const taskSchema = new mongoose.Schema(
   {
     description: {

@@ -3,6 +3,7 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Tasks = require("./tasks");
+//create a user schema with name ,email,password and age required
 const userSchema = new mongoose.Schema(
   {
     email: {
@@ -43,7 +44,7 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
+//when a user is saved to the database, use the bcrypt algorithm to hide the password
 userSchema.pre("save", async function (next) {
   const user = this;
   if (user.isModified("password")) {
@@ -51,11 +52,13 @@ userSchema.pre("save", async function (next) {
   }
   next();
 });
+//when a user is deleted, delete all the corresponding tasks for the user
 userSchema.pre("remove", async function (next) {
   const user = this;
   await Tasks.deleteMany({ owner: user._id });
   next();
 });
+//verify user credentials
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await Users.findOne({ email });
   if (!user) throw new Error("Login Unsuccessful");
@@ -64,6 +67,7 @@ userSchema.statics.findByCredentials = async (email, password) => {
   return user;
 };
 
+//create a token for user with a given id
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
   const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET);
@@ -79,6 +83,7 @@ userSchema.methods.getPublicProfile = function () {
   return user;
 };
 
+//used to map users to their tasks
 userSchema.virtual("tasks", {
   ref: "Tasks",
   localField: "_id",

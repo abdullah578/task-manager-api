@@ -7,6 +7,7 @@ const { sendWelcomeMail, sendCancellationMail } = require("../emails/accounts");
 
 const router = new express.Router();
 
+//create a new user account 
 router.post("/users", async (req, res) => {
   const user = new Users(req.body);
   try {
@@ -19,6 +20,7 @@ router.post("/users", async (req, res) => {
   }
 });
 
+//Use multer to upload image files (filesize less than 1MB)
 const upload = multer({
   limits: {
     fileSize: 1000000,
@@ -29,13 +31,14 @@ const upload = multer({
     cb(undefined, true);
   },
 });
-
+//uplaod an image as a profile picture
 router.post(
   "/users/me/avatar",
   auth,
   upload.single("avatar"),
   async (req, res) => {
     if (!req.file) return res.status(404).send();
+    //used the sharp module to resize the image and convert it to a png
     const fileBuffer = await sharp(req.file.buffer)
       .resize({ width: 250, height: 250 })
       .png()
@@ -49,12 +52,14 @@ router.post(
   }
 );
 
+//remove the profile picture
 router.delete("/users/me/avatar", auth, async (req, res) => {
   req.user.avatar = undefined;
   await req.user.save();
   res.send();
 });
 
+//get the profile pic for user by id
 router.get("/users/:id/avatar", async (req, res) => {
   try {
     const user = await Users.findById(req.params.id);
@@ -66,6 +71,8 @@ router.get("/users/:id/avatar", async (req, res) => {
   }
 });
 
+//allow existing user to login
+//returns the auth token when credentials are valid
 router.post("/users/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -77,6 +84,7 @@ router.post("/users/login", async (req, res) => {
   }
 });
 
+//logout thge user for all devices
 router.post("/users/logoutAll", async (req, res) => {
   try {
     req.user.tokens = [];
@@ -86,6 +94,7 @@ router.post("/users/logoutAll", async (req, res) => {
     res.status(500).send(e);
   }
 });
+//logout the user from existing device
 router.post("/users/logout", auth, async (req, res) => {
   try {
     req.user.tokens = req.user.tokens.filter(
@@ -97,10 +106,12 @@ router.post("/users/logout", auth, async (req, res) => {
     res.status(500).send(err);
   }
 });
+//get user info 
 router.get("/users/me", auth, async (req, res) => {
   res.send(req.user);
 });
 
+//update user info
 router.patch("/users/me", auth, async (req, res) => {
   try {
     const allowedProperties = ["name", "age", "age", "password"];
@@ -117,6 +128,7 @@ router.patch("/users/me", auth, async (req, res) => {
   }
 });
 
+//delete user 
 router.delete("/users/me", auth, async (req, res) => {
   try {
     await req.user.remove();

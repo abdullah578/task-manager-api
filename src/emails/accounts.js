@@ -2,6 +2,7 @@ const sgMail = require("@sendgrid/mail");
 
 sgMail.setApiKey(process.env.SEND_GRID_API_KEY);
 
+//send welcome email when a user signs up
 const sendWelcomeMail = (email, name) => {
   sgMail.send({
     from: "abdullah.mohammed@mail.utoronto.ca",
@@ -10,7 +11,7 @@ const sendWelcomeMail = (email, name) => {
     text: `Welcome to the app ${name}`,
   });
 };
-
+//send cancellation email when the user deletes his account
 const sendCancellationMail = (email, name) => {
   sgMail.send({
     from: "abdullah.mohammed@mail.utoronto.ca",
