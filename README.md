@@ -10,7 +10,7 @@ POST /users - create a new user account \
 POST /users/login -login and get auth token \
 POST /users/logout - logout and remove auth token \
 POST /users/me/avatar - upload an image as a profile picture \
-GET /users/me - get user information \ 
+GET /users/me - get user information <br/>
 PATCH /users/me - update user information \
 DELETE /users/me/avatar -delete profile picture \
 DELETE /users/me - delete user account 
