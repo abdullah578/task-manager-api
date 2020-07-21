@@ -13,7 +13,7 @@ POST /users/me/avatar - upload an image as a profile picture \
 GET /users/me - get user information \ 
 PATCH /users/me - update user information \
 DELETE /users/me/avatar -delete profile picture \
-DELETE /users/me - delete user account \
+DELETE /users/me - delete user account 
 
 **Tasks**
 
@@ -21,4 +21,4 @@ POST /tasks - create a new task \
 GET /tasks - get all tasks for current user \
 GET /tasks/:id - get task by id \
 PATCH /tasks/:id - update task by id \
-DELETE /tasks/:id - delete task by id  \
+DELETE /tasks/:id - delete task by id  
